@@ -10,7 +10,7 @@ class LoginApp extends StatelessWidget {
       title: 'Login App',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: Scaffold(
-        appBar: AppBar(title: Text('Login')),
+      
         body: LoginForm(),
       ),
     );
