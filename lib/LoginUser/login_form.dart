@@ -9,6 +9,8 @@ import '../Roles/Psicologa/psicologa_menu.dart'; // Importar la clase AdminScree
 import '../Roles/Recepcion/recepcion_menu.dart'; // Importar la clase AdminScreen
 import '../hashPass.dart';
 
+import '../FormsScreens/QR/utilQR.dart';
+
 class LoginForm extends StatefulWidget {
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -29,6 +31,16 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
+ Future<void> _QR() async {
+   
+   Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => QRScannerScreen()),
+        );
+    
+  }
+
+
   Future<void> _login() async {
     final String passSinHash = _passwordController.text;
     String email = _emailController.text;
@@ -40,7 +52,7 @@ class _LoginFormState extends State<LoginForm> {
     print("email: $email");
     print("pass: $password"); // Agrega ':' después de "pass"
  print("pass: $passSinHash"); // Agrega ':' después de "pass"
- 
+
     final response = await http.post(
       Uri.parse('${Config.apiUrl}/api/loginNormal'),
       body: {
@@ -224,6 +236,7 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
       ),
+      
     );
   }
 }

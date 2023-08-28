@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../FormsScreens/Users/formAddUser1.dart';
+import '../../FormsScreens/QR/utilQR.dart';
 
 enum MenuSection {
   Home,
@@ -175,10 +176,27 @@ class _AdminScreenState extends State<AdminScreen> {
                       context,
                       MaterialPageRoute(builder: (context) => FormAddUser1()),
                     );
+                    
                   },
                   child: Text('Abrir pantalla FormAddUser1'),
                 ),
+                
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => QRScannerScreen()),
+                    );
+                    
+                  },
+                  child: Text('Abrir pantalla qr'),
+                ),
+                
               )
+
             ],
           ),
         );
