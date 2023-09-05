@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:fluttertoast/fluttertoast.dart'; // Importa fluttertoast
 import '../config.dart';
-import '../Roles/Admin/admin_screen.dart'; // Importar la clase AdminScreen
-import '../Roles/Enfermera/enfermeria_menu.dart'; // Importar la clase AdminScreen
-import '../Roles/Instructora/instructora_menu.dart'; // Importar la clase AdminScreen
-import '../Roles/Psicologa/psicologa_menu.dart'; // Importar la clase AdminScreen
-import '../Roles/Recepcion/recepcion_menu.dart'; // Importar la clase AdminScreen
+import '../Roles/Admin/admin_screen.dart';
+import '../Roles/Enfermera/enfermeria_menu.dart';
+import '../Roles/Instructora/instructora_menu.dart';
+import '../Roles/Psicologa/psicologa_menu.dart';
+import '../Roles/Recepcion/recepcion_menu.dart';
 import '../hashPass.dart';
-
 import '../FormsScreens/QR/utilQR.dart';
 
 class LoginForm extends StatefulWidget {
@@ -31,81 +31,78 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
- Future<void> _QR() async {
-   
-   Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => QRScannerScreen()),
-        );
-    
+  Future<void> _QR() async {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => QRScannerScreen()),
+    );
   }
-
 
   Future<void> _login() async {
     final String passSinHash = _passwordController.text;
     String email = _emailController.text;
     String password = calculateHash(passSinHash);
 
-    //String email = "administradora@dif.com";
+    try {
+      final response = await http.post(
+        Uri.parse('${Config.apiUrl}/api/loginNormal'),
+        body: {
+          'email': email,
+          'password': password,
+        },
+      );
 
-    // mostrar
-    print("email: $email");
-    print("pass: $password"); // Agrega ':' después de "pass"
- print("pass: $passSinHash"); // Agrega ':' después de "pass"
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final String role = responseData['role'];
+        final String personalID = responseData['ID']; // Obtener el ID
 
-    final response = await http.post(
-      Uri.parse('${Config.apiUrl}/api/loginNormal'),
-      body: {
-        'email': email,
-        'password': password,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final String role = responseData['role'];
-
-      //////////////////////////////////////////// enfermeria
-      if (role == 'Enfermería') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => EnfermeriaScreen()),
-        );
-      }
-      //////////////////////////////////////////// administracion
-      if (role == 'Administración') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AdminScreen()),
-        );
-      }
-      //////////////////////////////////////////// recepcion
-      if (role == 'Recepción') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => RecepcionScreen()),
-        );
-      }
-      //////////////////////////////////////////// instructor
-      if (role == 'Instructor') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => InstructoraScreen()),
-        );
-      }
-      //////////////////////////////////////////// instructor
-      if (role == 'Psicología') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => PsicoScreen()),
-        );
+        // Manejo de roles
+        if (role == 'Enfermería') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => EnfermeriaScreen()),
+          );
+        } else if (role == 'Administración') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  AdminScreen(personalID: personalID), // Pasa userId aquí
+            ),
+          );
+        } else if (role == 'Recepción') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => RecepcionScreen()),
+          );
+        } else if (role == 'Instructor') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => InstructoraScreen()),
+          );
+        } else if (role == 'Psicología') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => PsicoScreen()),
+          );
+        } else {
+          // Redirigir a otras pantallas según los roles necesarios
+        }
       } else {
-        // Redirigir a otras pantallas según los roles necesarios
+        setState(() {
+          _errorMessage = 'Credenciales inválidas';
+        });
       }
-    } else {
-      setState(() {
-        _errorMessage = 'Credenciales inválidas';
-      });
+    } catch (e) {
+      // Si ocurre un error de conexión, muestra una alerta
+      Fluttertoast.showToast(
+        msg: 'Error de conexión al servidor',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+      );
     }
   }
 
@@ -140,11 +137,8 @@ class _LoginFormState extends State<LoginForm> {
                 child: Column(
                   children: <Widget>[
                     Container(
-                      margin: EdgeInsets.only(
-                          bottom: 45.0,
-                          top: 30), // Agregar margen inferior al logo
-                      child:
-                          Image.asset('lib/assets/logo.png'), // Agregar el logo
+                      margin: EdgeInsets.only(bottom: 45.0, top: 30),
+                      child: Image.asset('lib/assets/logo.png'),
                     ),
                     Form(
                       key: _formKey,
@@ -220,7 +214,7 @@ class _LoginFormState extends State<LoginForm> {
                               ),
                               onPressed: () {
                                 if (_formKey.currentState!.validate()) {
-                                  _login(); // Llamar a la función de inicio de sesión
+                                  _login();
                                 }
                               },
                               child: const Text('Iniciar sesión'),
@@ -236,7 +230,6 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
       ),
-      
     );
   }
 }
